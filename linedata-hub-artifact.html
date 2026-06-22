@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linedata · Content AI Hub</title>
+<style>
+:root {
+  color-scheme: light;
+  --red: #E4002B;
+  --red-dark: #B8001F;
+  --red-light: #fce8ec;
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-50); color: var(--gray-800); min-height: 100vh; display: flex; flex-direction: column; }
+
+header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 0 24px; height: 54px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-name { font-size: 15px; font-weight: 800; color: var(--red); letter-spacing: 0.5px; }
+.logo-divider { width: 1px; height: 20px; background: var(--gray-200); }
+.logo-product { font-size: 13px; font-weight: 600; color: var(--gray-600); }
+.header-tag { font-size: 11px; font-weight: 600; color: var(--red); background: var(--red-light); padding: 3px 10px; border-radius: 20px; }
+
+.app { display: flex; flex: 1; }
+
+aside { width: 210px; background: var(--white); border-right: 1px solid var(--gray-200); padding: 18px 0; display: flex; flex-direction: column; position: sticky; top: 54px; height: calc(100vh - 54px); overflow-y: auto; flex-shrink: 0; }
+.nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); padding: 8px 18px 4px; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 18px; cursor: pointer; font-size: 13.5px; color: var(--gray-600); border-left: 3px solid transparent; transition: all 0.15s; }
+.nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+.nav-item.active { background: var(--red-light); color: var(--red); border-left-color: var(--red); font-weight: 600; }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-divider { height: 1px; background: var(--gray-100); margin: 10px 18px; }
+
+main { flex: 1; padding: 28px; max-width: 820px; min-width: 0; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.page-header { margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--gray-200); }
+.breadcrumb { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
+.breadcrumb span { cursor: pointer; }
+.breadcrumb span:hover { color: var(--red); }
+.page-header h2 { font-size: 22px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.page-header p { font-size: 14px; color: var(--gray-600); }
+
+.agent-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+.agent-header { display: flex; align-items: center; gap: 14px; padding: 18px 20px; cursor: pointer; transition: background 0.15s; }
+.agent-header:hover { background: var(--gray-50); }
+.agent-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.agent-info { flex: 1; }
+.agent-info h3 { font-size: 14.5px; font-weight: 700; color: var(--gray-900); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.agent-info p { font-size: 12.5px; color: var(--gray-600); margin-top: 2px; }
+.agent-toggle { color: var(--gray-400); font-size: 12px; }
+.badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-blue { background: #eff6ff; color: #2563eb; }
+.badge-purple { background: #f5f3ff; color: #7c3aed; }
+.badge-teal { background: #f0fdfa; color: #0d9488; }
+.badge-orange { background: #fff7ed; color: #c2410c; }
+
+.agent-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--gray-100); }
+.agent-body.open { display: block; }
+
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12.5px; font-weight: 600; color: var(--gray-700); margin-bottom: 5px; }
+.label-hint { font-size: 11px; font-weight: 400; color: var(--gray-400); }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 13.5px; color: var(--gray-900); outline: none; font-family: inherit; transition: border-color 0.15s; background: var(--white); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--red); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-group { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; align-items: center; }
+.btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all 0.15s; }
+.btn-primary { background: var(--red); color: white; display: flex; align-items: center; gap: 7px; }
+.btn-primary:hover { background: var(--red-dark); }
+.btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; }
+.btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+.btn-secondary:hover { background: var(--gray-200); }
+
+/* OUTPUT */
+.output-section { margin-top: 22px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: var(--radius); padding: 18px; }
+.output-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 12px; }
+.output-content { font-size: 13.5px; line-height: 1.75; color: var(--gray-800); white-space: pre-wrap; word-break: break-word; background: white; border-radius: 8px; padding: 16px; border: 1px solid var(--gray-200); max-height: 420px; overflow-y: auto; }
+.output-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.copy-btn { padding: 7px 16px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--gray-200); background: white; color: var(--gray-700); font-family: inherit; transition: all 0.15s; }
+.copy-btn:hover { border-color: var(--gray-400); }
+.btn-add-to-cal { padding: 7px 16px; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1.5px solid #10b981; background: #f0fdf4; color: #10b981; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.btn-add-to-cal:hover { background: #10b981; color: white; }
+
+.loading-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px; color: var(--gray-600); font-size: 13.5px; gap: 14px; }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--gray-200); border-top-color: var(--red); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-box { background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #dc2626; margin-top: 16px; }
+
+/* HOME */
+.home-hero { margin-bottom: 32px; }
+.home-hero h1 { font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+.home-hero p { color: var(--gray-600); font-size: 14px; line-height: 1.6; }
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.team-card { background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius); padding: 22px 18px; cursor: pointer; transition: all 0.2s; }
+.team-card:hover { border-color: var(--red); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(228,0,43,0.1); }
+.team-icon-wrap { width: 44px; height: 44px; background: var(--red-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.team-card h3 { font-size: 14.5px; font-weight: 700; color: var(--gray-900); margin-bottom: 5px; }
+.team-card p { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
+
+/* CALENDAR */
+.cal-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.cal-nav { display: flex; align-items: center; gap: 10px; }
+.cal-nav h3 { font-size: 16px; font-weight: 700; color: var(--gray-900); min-width: 170px; text-align: center; }
+.cal-btn { width: 30px; height: 30px; border: 1px solid var(--gray-200); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.cal-btn:hover { background: var(--gray-100); }
+.cal-view-toggle { display: flex; background: var(--gray-100); border-radius: 8px; padding: 3px; gap: 2px; }
+.cal-view-btn { padding: 5px 14px; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; background: transparent; color: var(--gray-600); transition: all 0.15s; font-family: inherit; }
+.cal-view-btn.active { background: var(--white); color: var(--gray-900); box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 600; }
+.btn-add-event { display: flex; align-items: center; gap: 6px; background: var(--red); color: white; border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; font-family: inherit; }
+.btn-add-event:hover { background: var(--red-dark); }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; padding: 10px 14px; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--gray-600); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-sep { width: 1px; height: 14px; background: var(--gray-200); margin: 0 4px; }
+
+.cal-month-grid { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+.cal-month-header { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--gray-50); border-bottom: 1px solid var(--gray-200); }
+.cal-month-header span { text-align: center; padding: 9px 4px; font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; }
+.cal-month-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-day { min-height: 82px; border-right: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100); padding: 5px; position: relative; }
+.cal-day:nth-child(7n) { border-right: none; }
+.cal-day.other-month .day-num { color: var(--gray-400); }
+.cal-day.today { background: #fff8f8; }
+.cal-day.today .day-num { background: var(--red); color: white; border-radius: 50%; }
+.day-num { font-size: 11.5px; font-weight: 600; color: var(--gray-600); margin-bottom: 3px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+.day-add { position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; border: none; background: transparent; color: var(--gray-400); font-size: 15px; cursor: pointer; border-radius: 4px; display: none; align-items: center; justify-content: center; line-height: 1; }
+.cal-day:hover .day-add { display: flex; }
+.cal-day:hover .day-add:hover { color: var(--red); }
+.cal-event-chip { font-size: 10.5px; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; cursor: pointer; display: flex; align-items: center; gap: 3px; overflow: hidden; }
+.cal-event-chip:hover { opacity: 0.8; }
+.chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.more-events { font-size: 10px; color: var(--gray-400); padding: 1px 3px; cursor: pointer; }
+.more-events:hover { color: var(--red); }
+
+.cal-week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.cal-week-col { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+.cal-week-col-header { text-align: center; padding: 9px 4px; border-bottom: 1px solid var(--gray-200); background: var(--gray-50); }
+.week-day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); }
+.week-day-num { font-size: 18px; font-weight: 700; color: var(--gray-800); line-height: 1.2; }
+.week-day-num.today-num { color: var(--red); }
+.cal-week-events { padding: 7px; min-height: 100px; }
+.week-add-btn { width: 100%; border: 1.5px dashed var(--gray-200); background: transparent; color: var(--gray-400); font-size: 10.5px; padding: 5px; border-radius: 6px; cursor: pointer; margin-top: 5px; transition: all 0.15s; font-family: inherit; }
+.week-add-btn:hover { border-color: var(--red); color: var(--red); }
+.cal-event-card { border-radius: 6px; padding: 5px 7px; margin-bottom: 5px; cursor: pointer; border-left: 3px solid; transition: box-shadow 0.15s; font-size: 11.5px; }
+.cal-event-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.event-card-title { font-weight: 600; color: var(--gray-900); line-height: 1.3; margin-bottom: 3px; }
+.event-type-badge { font-size: 9.5px; padding: 1px 5px; border-radius: 20px; font-weight: 600; color: white; }
+.event-status-badge { font-size: 9.5px; padding: 1px 5px; border-radius: 20px; font-weight: 600; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 14px; padding: 28px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 20px; color: var(--gray-900); }
+.modal .form-group { margin-bottom: 14px; }
+.modal label { display: block; font-size: 12.5px; font-weight: 600; color: var(--gray-700); margin-bottom: 5px; }
+.modal input, .modal select, .modal textarea { width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 13.5px; color: var(--gray-900); outline: none; transition: border-color 0.15s; font-family: inherit; }
+.modal input:focus, .modal select:focus, .modal textarea:focus { border-color: var(--red); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.modal-delete { margin-right: auto; background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer; font-weight: 600; padding: 8px 0; }
+.modal-delete:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-name">LINEDATA</span>
+    <div class="logo-divider"></div>
+    <span class="logo-product">Content AI Hub</span>
+  </div>
+  <span class="header-tag">✦ Généré par IA</span>
+</header>
+
+<div class="app">
+<aside>
+  <div class="nav-label">Navigation</div>
+  <div class="nav-item active" id="nav-home" onclick="showScreen('home')">
+    <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h3a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+    Accueil
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-label">Équipes</div>
+  <div class="nav-item" id="nav-sales" onclick="showScreen('sales')">
+    <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-8 8a2 2 0 002 2h12a2 2 0 002-2v-3a24.085 24.085 0 01-10 2 24.085 24.085 0 01-10-2v3z" clip-rule="evenodd"/></svg>
+    Sales
+  </div>
+  <div class="nav-item" id="nav-com" onclick="showScreen('com')">
+    <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clip-rule="evenodd"/></svg>
+    Communication
+  </div>
+  <div class="nav-item" id="nav-marketing" onclick="showScreen('marketing')">
+    <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+    Marketing
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-label">Planification</div>
+  <div class="nav-item" id="nav-cal" onclick="showScreen('cal')">
+    <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+    Calendrier éditorial
+  </div>
+</aside>
+
+<main>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <h1>Content AI Hub <span style="color:var(--red)">Linedata</span></h1>
+    <p>Générez du contenu on-brand directement dans l'outil — emails, posts, fiches produit.<br>Choisissez votre équipe, remplissez le formulaire, cliquez <strong>Générer</strong>.</p>
+  </div>
+  <div class="team-grid">
+    <div class="team-card" onclick="showScreen('sales')">
+      <div class="team-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="#E4002B" stroke-width="1.8" width="26" height="26"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
+      <h3>Sales</h3>
+      <p>Réponses emails clients, messages LinkedIn de prospection.</p>
+    </div>
+    <div class="team-card" onclick="showScreen('com')">
+      <div class="team-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="#E4002B" stroke-width="1.8" width="26" height="26"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <h3>Communication</h3>
+      <p>Posts LinkedIn page Linedata, posts Instagram.</p>
+    </div>
+    <div class="team-card" onclick="showScreen('marketing')">
+      <div class="team-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="#E4002B" stroke-width="1.8" width="26" height="26"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+      <h3>Marketing</h3>
+      <p>Newsletter, campagnes email, fiches produit.</p>
+    </div>
+  </div>
+  <div style="margin-top:28px;padding:18px 20px;background:var(--red-light);border-radius:var(--radius);border-left:4px solid var(--red);">
+    <p style="font-size:13px;font-weight:700;color:var(--red-dark);margin-bottom:5px;">Comment ça marche</p>
+    <p style="font-size:13px;color:var(--gray-600);line-height:1.7;">Sélectionnez votre équipe → Choisissez le type de contenu → Remplissez le formulaire → Cliquez sur <strong>Générer</strong>. Le contenu apparaît directement, prêt à copier. Ajoutez-le ensuite au calendrier éditorial en un clic.</p>
+  </div>
+</div>
+
+<!-- SALES -->
+<div class="screen" id="screen-sales">
+  <div class="page-header">
+    <div class="breadcrumb"><span onclick="showScreen('home')">Accueil</span> › Sales</div>
+    <h2>Équipe Sales</h2>
+    <p>Réponses email et messages LinkedIn de prospection générés directement.</p>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('email')">
+      <div class="agent-icon" style="background:#fce8ec;"><svg viewBox="0 0 24 24" fill="none" stroke="#E4002B" stroke-width="2" width="22" height="22"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="agent-info">
+        <h3>Réponse Email <span class="badge badge-red">Client / Prospect</span></h3>
+        <p>Réponse professionnelle à un email reçu — 3 versions générées</p>
+      </div>
+      <span class="agent-toggle" id="toggle-email">▼</span>
+    </div>
+    <div class="agent-body" id="body-email">
+      <div style="height:14px;"></div>
+      <div class="form-group"><label>Objet de l'email reçu</label><input type="text" id="email-subject" placeholder="ex : Question sur vos solutions de gestion d'actifs"></div>
+      <div class="form-group"><label>Contenu de l'email reçu <span class="label-hint">collez le texte ici</span></label><textarea id="email-body" rows="5" placeholder="Copiez-collez l'email reçu..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Votre nom et poste</label><input type="text" id="email-sender" placeholder="ex : Marie Dupont, Account Manager"></div>
+        <div class="form-group"><label>Objectif de la réponse</label><select id="email-goal"><option>Qualifier le besoin</option><option>Obtenir un rendez-vous</option><option>Fournir une information</option><option>Relancer sans insister</option></select></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-email" onclick="generate('email')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('email')">Effacer</button>
+      </div>
+      <div id="out-email"></div>
+    </div>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('linkedin-sales')">
+      <div class="agent-icon" style="background:#e8f0fb;"><svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="5" fill="#0A66C2"/><path d="M8 10H5.5v8H8v-8zm-1.25-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm12.25 7c0-2.76-2.24-5-5-5-1.5 0-2.84.66-3.75 1.7V10H7.75v8h2.5v-6a2.5 2.5 0 015 0v6H18v-5z" fill="white"/></svg></div>
+      <div class="agent-info">
+        <h3>Message LinkedIn <span class="badge badge-blue">Prospection</span></h3>
+        <p>Message personnalisé de prise de contact — 2 versions</p>
+      </div>
+      <span class="agent-toggle" id="toggle-linkedin-sales">▼</span>
+    </div>
+    <div class="agent-body" id="body-linkedin-sales">
+      <div style="height:14px;"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Prénom et nom du prospect</label><input type="text" id="li-name" placeholder="ex : Thomas Renard"></div>
+        <div class="form-group"><label>Poste actuel</label><input type="text" id="li-role" placeholder="ex : CFO chez Amundi"></div>
+      </div>
+      <div class="form-group"><label>Secteur / entreprise</label><input type="text" id="li-company" placeholder="ex : Asset management, Paris, 500+ employés"></div>
+      <div class="form-group"><label>Élément contextuel <span class="label-hint">post récent, article partagé, événement...</span></label><textarea id="li-context" rows="3" placeholder="ex : Il a partagé un article sur la réglementation AIFMD la semaine dernière..."></textarea></div>
+      <div class="form-group"><label>Objectif</label><select id="li-goal"><option>Obtenir un rendez-vous découverte</option><option>Inviter à un événement Linedata</option><option>Créer un premier lien</option></select></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-linkedin-sales" onclick="generate('linkedin-sales')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('linkedin-sales')">Effacer</button>
+      </div>
+      <div id="out-linkedin-sales"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNICATION -->
+<div class="screen" id="screen-com">
+  <div class="page-header">
+    <div class="breadcrumb"><span onclick="showScreen('home')">Accueil</span> › Communication</div>
+    <h2>Équipe Communication</h2>
+    <p>Posts réseaux sociaux pour la page Linedata, générés directement.</p>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('linkedin-post')">
+      <div class="agent-icon" style="background:#e8f0fb;"><svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="5" fill="#0A66C2"/><path d="M8 10H5.5v8H8v-8zm-1.25-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm12.25 7c0-2.76-2.24-5-5-5-1.5 0-2.84.66-3.75 1.7V10H7.75v8h2.5v-6a2.5 2.5 0 015 0v6H18v-5z" fill="white"/></svg></div>
+      <div class="agent-info">
+        <h3>Post LinkedIn <span class="badge badge-blue">Page Linedata</span></h3>
+        <p>Contenu engageant pour la page entreprise — hook + développement + hashtags</p>
+      </div>
+      <span class="agent-toggle" id="toggle-linkedin-post">▼</span>
+    </div>
+    <div class="agent-body" id="body-linkedin-post">
+      <div style="height:14px;"></div>
+      <div class="form-group"><label>Sujet du post</label><input type="text" id="lp-topic" placeholder="ex : Acquisition de nRoad, T+1 settlement, innovation IA..."></div>
+      <div class="form-group"><label>Message clé à faire passer</label><textarea id="lp-message" rows="3" placeholder="ex : Linedata renforce son offre IA pour les institutions financières avec l'acquisition de nRoad en 2025"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Ton</label><select id="lp-tone"><option>Expert et informatif</option><option>Inspirant</option><option>Humain et accessible</option><option>Orienté action</option></select></div>
+        <div class="form-group"><label>Longueur</label><select id="lp-length"><option>Court (150–250 mots)</option><option>Moyen (300–400 mots)</option><option>Long (500+ mots)</option></select></div>
+      </div>
+      <div class="form-group"><label>Éléments spécifiques <span class="label-hint">chiffres, citations, contexte</span></label><input type="text" id="lp-extras" placeholder="optionnel"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-linkedin-post" onclick="generate('linkedin-post')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('linkedin-post')">Effacer</button>
+      </div>
+      <div id="out-linkedin-post"></div>
+    </div>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('instagram')">
+      <div class="agent-icon" style="background:#fdf2f8;">
+        <svg viewBox="0 0 24 24" width="22" height="22"><defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect width="24" height="24" rx="5" fill="url(#ig)"/><rect x="5" y="5" width="14" height="14" rx="4" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="white" stroke-width="1.5"/><circle cx="17" cy="7" r="1" fill="white"/></svg>
+      </div>
+      <div class="agent-info">
+        <h3>Post Instagram <span class="badge badge-purple">@linedata_global</span></h3>
+        <p>Caption + suggestion visuelle + hashtags</p>
+      </div>
+      <span class="agent-toggle" id="toggle-instagram">▼</span>
+    </div>
+    <div class="agent-body" id="body-instagram">
+      <div style="height:14px;"></div>
+      <div class="form-group"><label>Sujet du post</label><input type="text" id="ig-topic" placeholder="ex : Culture Linedata, innovation IA, événement LDX..."></div>
+      <div class="form-group"><label>Contexte <span class="label-hint">détails, ambiance souhaitée</span></label><textarea id="ig-context" rows="3" placeholder="optionnel"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Type de contenu</label><select id="ig-type"><option>Culture d'entreprise</option><option>Produit / Solution</option><option>Événement</option><option>Insight / Tendance</option></select></div>
+        <div class="form-group"><label>Nombre de hashtags</label><select id="ig-hashtags"><option value="10">10 hashtags</option><option value="15" selected>15 hashtags</option></select></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-instagram" onclick="generate('instagram')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('instagram')">Effacer</button>
+      </div>
+      <div id="out-instagram"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MARKETING -->
+<div class="screen" id="screen-marketing">
+  <div class="page-header">
+    <div class="breadcrumb"><span onclick="showScreen('home')">Accueil</span> › Marketing</div>
+    <h2>Équipe Marketing</h2>
+    <p>Newsletter, campagnes email, fiches produit générées directement.</p>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('newsletter')">
+      <div class="agent-icon" style="background:#f0fdfa;"><svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" width="22" height="22"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="agent-info">
+        <h3>Newsletter <span class="badge badge-teal">Externe</span></h3>
+        <p>Newsletter mensuelle complète avec 3 variantes d'objet</p>
+      </div>
+      <span class="agent-toggle" id="toggle-newsletter">▼</span>
+    </div>
+    <div class="agent-body" id="body-newsletter">
+      <div style="height:14px;"></div>
+      <div class="form-group"><label>Thème du mois</label><input type="text" id="nl-theme" placeholder="ex : Intelligence artificielle et conformité réglementaire"></div>
+      <div class="form-group"><label>Contenus à inclure <span class="label-hint">actualités, événements, nouveautés</span></label><textarea id="nl-content" rows="4" placeholder="ex : Acquisition de nRoad, webinar T+1 le 15 juin, nouvelle version Linedata AMP..."></textarea></div>
+      <div class="form-group"><label>Direction éditoriale <span class="label-hint">optionnel</span></label><input type="text" id="nl-editorial" placeholder="ex : Ton rassurant face aux changements réglementaires"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-newsletter" onclick="generate('newsletter')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('newsletter')">Effacer</button>
+      </div>
+      <div id="out-newsletter"></div>
+    </div>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('campaign')">
+      <div class="agent-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" width="22" height="22"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="agent-info">
+        <h3>Campagne Email <span class="badge badge-orange">Marketing</span></h3>
+        <p>Séquence d'emails événementiels avec A/B test sur les objets</p>
+      </div>
+      <span class="agent-toggle" id="toggle-campaign">▼</span>
+    </div>
+    <div class="agent-body" id="body-campaign">
+      <div style="height:14px;"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Événement / Sujet</label><input type="text" id="camp-event" placeholder="ex : Webinar LDX Lending 2026"></div>
+        <div class="form-group"><label>Date de l'événement</label><input type="date" id="camp-date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Format</label><select id="camp-format"><option>Webinar</option><option>Conférence</option><option>Démo produit</option><option>Table ronde</option></select></div>
+        <div class="form-group"><label>Emails à produire</label><select id="camp-emails"><option value="invite">Invitation uniquement</option><option value="full">Séquence complète (invitation + rappel + post-événement)</option></select></div>
+      </div>
+      <div class="form-group"><label>Cible</label><input type="text" id="camp-target" placeholder="ex : CFO et directeurs risques, gestionnaires d'actifs alternatifs"></div>
+      <div class="form-group"><label>Promesse / bénéfice principal</label><textarea id="camp-promise" rows="2" placeholder="ex : Comprendre les implications du règlement T+1 pour les fonds alternatifs"></textarea></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-campaign" onclick="generate('campaign')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('campaign')">Effacer</button>
+      </div>
+      <div id="out-campaign"></div>
+    </div>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-header" onclick="toggleAgent('product')">
+      <div class="agent-icon" style="background:#f5f3ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" width="22" height="22"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+      <div class="agent-info">
+        <h3>Fiche Produit <span class="badge badge-purple">One-pager</span></h3>
+        <p>Fiche commerciale structurée, prête pour les équipes Sales</p>
+      </div>
+      <span class="agent-toggle" id="toggle-product">▼</span>
+    </div>
+    <div class="agent-body" id="body-product">
+      <div style="height:14px;"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Produit / Solution</label><select id="prod-name"><option>Linedata AMP</option><option>Linedata Optima</option><option>Linedata Chorus</option><option>Linedata Icon</option></select></div>
+        <div class="form-group"><label>Cible principale</label><input type="text" id="prod-target" placeholder="ex : DSI, gestionnaires d'actifs alternatifs"></div>
+      </div>
+      <div class="form-group"><label>Problème client résolu</label><textarea id="prod-problem" rows="3" placeholder="ex : Difficulté à consolider les données de portefeuilles multi-classes d'actifs en temps réel..."></textarea></div>
+      <div class="form-group"><label>Bénéfices clés</label><textarea id="prod-benefits" rows="3" placeholder="ex : Réduction de 40% du temps de réconciliation, conformité AIFMD automatisée..."></textarea></div>
+      <div class="form-group"><label>Appel à l'action</label><select id="prod-cta"><option>Demander une démo</option><option>Contacter un expert Linedata</option><option>Télécharger la documentation</option></select></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-product" onclick="generate('product')"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer</button>
+        <button class="btn btn-secondary" onclick="clearAgent('product')">Effacer</button>
+      </div>
+      <div id="out-product"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDRIER -->
+<div class="screen" id="screen-cal">
+  <div class="page-header">
+    <div class="breadcrumb"><span onclick="showScreen('home')">Accueil</span> › Calendrier éditorial</div>
+    <h2>Calendrier éditorial</h2>
+    <p>Planifiez vos contenus, suivez leur statut et tracez chaque publication.</p>
+  </div>
+  <div class="cal-legend">
+    <span style="font-size:11.5px;font-weight:700;color:var(--gray-600);margin-right:4px;">Statut :</span>
+    <div class="legend-item"><div class="legend-dot" style="background:#9ca3af"></div>Brouillon</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Planifié</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>À valider</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Publié / Envoyé</div>
+    <div class="legend-sep"></div>
+    <span style="font-size:11.5px;font-weight:700;color:var(--gray-600);margin-right:4px;">Type :</span>
+    <div class="legend-item"><div class="legend-dot" style="background:#E4002B"></div>Email</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0A66C2"></div>LinkedIn</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#E1306C"></div>Instagram</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#14b8a6"></div>Newsletter</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Campagne</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Fiche produit</div>
+  </div>
+  <div class="cal-toolbar">
+    <div class="cal-nav">
+      <button class="cal-btn" onclick="calNav(-1)">&#8249;</button>
+      <h3 id="cal-title"></h3>
+      <button class="cal-btn" onclick="calNav(1)">&#8250;</button>
+      <button class="cal-btn" onclick="calGoToday()" style="width:auto;padding:0 10px;font-size:12px;font-weight:600;">Aujourd'hui</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="cal-view-toggle">
+        <button class="cal-view-btn active" id="btn-view-month" onclick="setCalView('month')">Mois</button>
+        <button class="cal-view-btn" id="btn-view-week" onclick="setCalView('week')">Semaine</button>
+      </div>
+      <button class="btn-add-event" onclick="openModal()">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M8 2a1 1 0 00-1 1v4H3a1 1 0 000 2h4v4a1 1 0 102 0V9h4a1 1 0 100-2H9V3a1 1 0 00-1-1z"/></svg>Ajouter
+      </button>
+    </div>
+  </div>
+  <div id="cal-month-view"></div>
+  <div id="cal-week-view" style="display:none"></div>
+</div>
+
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="event-modal" onclick="closeModalIfBg(event)">
+  <div class="modal">
+    <h3 id="modal-title">Ajouter un contenu</h3>
+    <input type="hidden" id="modal-event-id">
+    <div class="form-group"><label>Titre *</label><input type="text" id="modal-name" placeholder="ex : Post LinkedIn — nRoad acquisition"></div>
+    <div class="form-group"><label>Type</label><select id="modal-type"><option value="email">Email</option><option value="linkedin-sales">LinkedIn Prospection</option><option value="linkedin-post">Post LinkedIn</option><option value="instagram">Post Instagram</option><option value="newsletter">Newsletter</option><option value="campaign">Campagne Email</option><option value="product">Fiche Produit</option></select></div>
+    <div class="form-group"><label>Date *</label><input type="date" id="modal-date"></div>
+    <div class="form-group"><label>Statut</label><select id="modal-status"><option value="draft">Brouillon</option><option value="planned">Planifié</option><option value="review">À valider</option><option value="published">Publié / Envoyé</option></select></div>
+    <div class="form-group"><label>Notes <span style="font-weight:400;color:var(--gray-400)">(optionnel)</span></label><textarea id="modal-notes" rows="2" placeholder="Lien vers le contenu, remarques..."></textarea></div>
+    <div class="modal-actions">
+      <button class="modal-delete" id="modal-delete-btn" onclick="deleteEvent()" style="display:none">Supprimer</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ BRAND DNA ══
+const BRAND_DNA = `Tu es l'assistant IA interne de Linedata, expert en génération de contenu B2B professionnel.
+
+IDENTITÉ LINEDATA :
+- Éditeur international de logiciels, services et données pour l'asset management et les crédits/financements
+- Fondée en janvier 1998 — plus de 25 ans d'expertise. Cotée sur Euronext depuis 2000.
+- CEO & Fondateur : Anvaraly Jiva. Tagline : "We Humanize Technology"
+- 20 bureaux | 1 350 collaborateurs | 700 clients | 63 000 utilisateurs financiers mondiaux
+
+PRODUITS (noms exacts) :
+- Linedata AMP — plateforme cloud intelligente pour gestionnaires d'actifs
+- Linedata Optima — solution front-to-back gestion d'actifs
+- Linedata Chorus — gestion administrative et comptable SaaS multi-normes
+- Linedata Icon — comptabilité et portefeuilles titres pour administrateurs de fonds
+
+SEGMENTS : Gestionnaires d'actifs (institutionnels et alternatifs), Administrateurs de fonds, Assureurs, Prêteurs/bailleurs
+
+IA : Acquisition DreamQuark (2024) + nRoad (2025) — IA pour institutions financières
+
+RÈGLES DE TON :
+✓ Clair, direct, professionnel, orienté solution et bénéfice client
+✓ Chiffres concrets et vérifiables (utiliser les stats Linedata ci-dessus)
+✗ JAMAIS : "révolutionnaire", "game-changer", "disruptif", "synergie", "plongeons dans"
+✗ JAMAIS de jargon IA creux, JAMAIS de promesses vagues`;
+
+// ══ PROMPT BUILDERS ══
+function buildPrompt(type, i) {
+  const dna = BRAND_DNA;
+  switch(type) {
+    case 'email': return `${dna}\n\nMISSION : Rédige 3 versions de réponse professionnelle à cet email.\n\nEMAIL REÇU :\nObjet : ${i.subject||'Non précisé'}\nContenu : ${i.body||'Non précisé'}\n\nEXPÉDITEUR : ${i.sender||'Collaborateur Linedata'}\nOBJECTIF : ${i.goal}\n\nPRODUIS 3 VERSIONS :\n- Version 1 — Formelle : ton soutenu, structure claire\n- Version 2 — Directe : concise, orientée action\n- Version 3 — Relationnelle : chaleureuse, crée un lien\n\nChaque version : objet de réponse + corps (150-250 mots max) + proposition de suite concrète + signature "[Prénom] — Linedata"`;
+
+    case 'linkedin-sales': return `${dna}\n\nMISSION : Rédige 2 messages LinkedIn de prospection personnalisés (max 300 caractères chacun, limite connexion LinkedIn).\n\nPROSPECT :\n- Nom : ${i.name||'[Prospect]'}\n- Poste : ${i.role||'Non précisé'}\n- Contexte : ${i.company||'Non précisé'}\n${i.context?`- Élément personnalisation : ${i.context}`:''}\nOBJECTIF : ${i.goal}\n\nRÈGLES :\n✓ Ne pas commencer par "Bonjour [Prénom]," — accroche originale liée au contexte\n✓ Un seul message, une seule idée, un seul CTA\n✓ Ton humain et direct\n✓ Lien Linedata naturel, pas forcé\n\nProduis 2 versions avec accroche différente. Précise le nombre de caractères de chaque version.`;
+
+    case 'linkedin-post': return `${dna}\n\nMISSION : Rédige un post LinkedIn engageant pour la PAGE ENTREPRISE Linedata.\n\nSUJET : ${i.topic||'Non précisé'}\nMESSAGE CLÉ : ${i.message||'Non précisé'}\nTON : ${i.tone}\nLONGUEUR : ${i.length}\n${i.extras?`ÉLÉMENTS SPÉCIFIQUES : ${i.extras}`:''}\n\nSTRUCTURE OBLIGATOIRE :\n1. Hook (1-2 lignes) : arrête le scroll — chiffre, question ou affirmation forte\n2. Développement : paragraphes courts (1-2 phrases), retours à la ligne fréquents\n3. Conclusion : question ou invitation à l'échange\n4. 3-5 hashtags sectoriels pertinents\n\nRÈGLES : phrases courtes, lisible mobile, jamais publicitaire.`;
+
+    case 'instagram': return `${dna}\n\nMISSION : Rédige un post Instagram professionnel pour @linedata_global.\n\nSUJET : ${i.topic||'Non précisé'}\n${i.context?`CONTEXTE : ${i.context}`:''}\nTYPE : ${i.type}\n\nLIVRABLE ATTENDU :\n1. CAPTION (150-200 mots max) : accroche forte en première ligne (pas "Nous sommes fiers de..."), ton accessible et humain, terminer par question ou invitation\n2. SUGGESTION VISUELLE : description précise de l'image ou vidéo idéale\n3. ${i.hashtags} HASHTAGS : mix #fintech #assetmanagement + hashtags de niche`;
+
+    case 'newsletter': return `${dna}\n\nMISSION : Rédige la newsletter externe Linedata complète.\n\nTHÈME : ${i.theme||'Non précisé'}\nCONTENUS : ${i.content||'Non précisé'}\n${i.editorial?`DIRECTION ÉDITORIALE : ${i.editorial}`:''}\n\nSTRUCTURE :\n1. OBJETS : 3 variantes percutantes (< 50 caractères chacune)\n2. ÉDITORIAL (150-200 mots) : ancré dans l'actualité, ton expert mais humain\n3. ACTUALITÉS LINEDATA (2-3 blocs) : Titre + 60 mots + [Lire la suite]\n4. INSIGHT DU MOIS (100 mots) : tendance sectorielle pertinente\n5. CTA FINAL : appel à l'action clair\n\nRÈGLES : titres informatifs, contenu actionnable, jamais auto-promotionnel.`;
+
+    case 'campaign': return `${dna}\n\nMISSION : Rédige ${i.emails==='full'?'une séquence complète de 3 emails (invitation + rappel J-3 + post-événement)':"l'email d'invitation"}.\n\nÉVÉNEMENT : ${i.event||'Non précisé'}\nDATE : ${i.date||'Non précisée'}\nFORMAT : ${i.format}\nCIBLE : ${i.target||'Non précisée'}\nPROMESSE PRINCIPALE : ${i.promise||'Non précisée'}\n\nPOUR CHAQUE EMAIL :\n- Objet A + Objet B (A/B test) avec score de curiosité /10 + justification\n- Pré-header (80-100 caractères)\n- Corps complet\n- CTA unique et clair\n\nCONTRAINTES : Invitation 200-280 mots | Rappel 120-150 mots | Post-événement 150-200 mots | Focus valeur pour le lecteur, pas Linedata.`;
+
+    case 'product': return `${dna}\n\nMISSION : Rédige une fiche produit commerciale (one-pager) prête à l'emploi.\n\nPRODUIT : ${i.name}\nCIBLE : ${i.target||'Non précisée'}\nPROBLÈME RÉSOLU : ${i.problem||'Non précisé'}\nBÉNÉFICES CLÉS : ${i.benefits||'Non précisés'}\nCTA : ${i.cta}\n\nSTRUCTURE :\n1. HEADLINE : bénéfice principal (pas le nom du produit)\n2. SOUS-TITRE : problème résolu en une phrase\n3. POUR QUI : profil et contexte cible\n4. CE QUE ÇA CHANGE : 3 bénéfices factuels\n5. COMMENT ÇA MARCHE : 3 étapes simples\n6. CHIFFRE CLÉ : preuve de valeur concrète\n7. CTA : "${i.cta}"\n\nRÈGLES : lisible en 30 secondes, zéro jargon non expliqué.`;
+  }
+}
+
+// ══ INPUTS ══
+function getInputs(type) {
+  const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const gSel = id => { const el = document.getElementById(id); return el ? el.options[el.selectedIndex].text : ''; };
+  switch(type) {
+    case 'email': return { subject: g('email-subject'), body: g('email-body'), sender: g('email-sender'), goal: gSel('email-goal') };
+    case 'linkedin-sales': return { name: g('li-name'), role: g('li-role'), company: g('li-company'), context: g('li-context'), goal: gSel('li-goal') };
+    case 'linkedin-post': return { topic: g('lp-topic'), message: g('lp-message'), tone: gSel('lp-tone'), length: gSel('lp-length'), extras: g('lp-extras') };
+    case 'instagram': return { topic: g('ig-topic'), context: g('ig-context'), type: gSel('ig-type'), hashtags: g('ig-hashtags') };
+    case 'newsletter': return { theme: g('nl-theme'), content: g('nl-content'), editorial: g('nl-editorial') };
+    case 'campaign': return { event: g('camp-event'), date: g('camp-date'), format: gSel('camp-format'), emails: g('camp-emails'), target: g('camp-target'), promise: g('camp-promise') };
+    case 'product': return { name: gSel('prod-name'), target: g('prod-target'), problem: g('prod-problem'), benefits: g('prod-benefits'), cta: gSel('prod-cta') };
+  }
+}
+
+function getCalName(type, i) {
+  switch(type) {
+    case 'email': return i.subject ? `Email : ${i.subject}` : 'Réponse email';
+    case 'linkedin-sales': return i.name ? `LinkedIn Prosp. — ${i.name}` : 'Message LinkedIn';
+    case 'linkedin-post': return i.topic ? `Post LinkedIn — ${i.topic}` : 'Post LinkedIn';
+    case 'instagram': return i.topic ? `Instagram — ${i.topic}` : 'Post Instagram';
+    case 'newsletter': return i.theme ? `Newsletter — ${i.theme}` : 'Newsletter';
+    case 'campaign': return i.event ? `Campagne — ${i.event}` : 'Campagne email';
+    case 'product': return `Fiche produit — ${i.name}`;
+  }
+}
+
+// ══ GENERATE ══
+async function generate(type) {
+  const inputs = getInputs(type);
+  const prompt = buildPrompt(type, inputs);
+  const btn = document.getElementById('btn-' + type);
+  const outEl = document.getElementById('out-' + type);
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>Génération en cours...';
+  outEl.innerHTML = `<div class="output-section"><div class="loading-box"><div class="spinner"></div><span>L'IA génère votre contenu...</span></div></div>`;
+
+  try {
+    const result = await window.cowork.askClaude(prompt, []);
+    const content = typeof result === 'string' ? result : (result?.content?.[0]?.text || result?.text || JSON.stringify(result));
+    const calName = getCalName(type, inputs);
+
+    outEl.innerHTML = `
+      <div class="output-section">
+        <div class="output-label">✓ Contenu généré — prêt à utiliser</div>
+        <div class="output-content" id="content-${type}">${escHtml(content)}</div>
+        <div class="output-actions">
+          <button class="copy-btn" onclick="copyContent('${type}')">Copier le contenu</button>
+          <button class="btn-add-to-cal" onclick="openModalPrefill('${type}','${escAttr(calName)}')">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path fill-rule="evenodd" d="M5 1a1 1 0 00-1 1v1H3a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-1V2a1 1 0 10-2 0v1H6V2a1 1 0 00-1-1zm0 4a1 1 0 000 2h6a1 1 0 100-2H5z" clip-rule="evenodd"/></svg>
+            Ajouter au calendrier
+          </button>
+        </div>
+      </div>`;
+  } catch(e) {
+    outEl.innerHTML = `<div class="error-box">Erreur lors de la génération. Vérifiez votre connexion et réessayez.</div>`;
+    console.error(e);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 1z"/></svg>Générer';
+  outEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+function copyContent(type) {
+  const el = document.getElementById('content-' + type);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = el.parentElement.querySelector('.copy-btn');
+    if (btn) { btn.textContent = '✓ Copié !'; setTimeout(() => btn.textContent = 'Copier le contenu', 2000); }
+  });
+}
+
+// ══ UI ══
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+  if (id === 'cal') renderCal();
+}
+
+function toggleAgent(id) {
+  const body = document.getElementById('body-' + id);
+  const tog = document.getElementById('toggle-' + id);
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▲' : '▼';
+}
+
+function clearAgent(type) {
+  const fields = { email:['email-subject','email-body','email-sender'], 'linkedin-sales':['li-name','li-role','li-company','li-context'], 'linkedin-post':['lp-topic','lp-message','lp-extras'], instagram:['ig-topic','ig-context'], newsletter:['nl-theme','nl-content','nl-editorial'], campaign:['camp-event','camp-date','camp-target','camp-promise'], product:['prod-target','prod-problem','prod-benefits'] };
+  (fields[type]||[]).forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const out = document.getElementById('out-'+type);
+  if(out) out.innerHTML='';
+}
+
+// ══ CALENDAR ══
+const TYPE_META = { email:{label:'Email',color:'#E4002B'}, 'linkedin-sales':{label:'LinkedIn Prosp.',color:'#0A66C2'}, 'linkedin-post':{label:'Post LinkedIn',color:'#0A66C2'}, instagram:{label:'Instagram',color:'#E1306C'}, newsletter:{label:'Newsletter',color:'#14b8a6'}, campaign:{label:'Campagne',color:'#f97316'}, product:{label:'Fiche Produit',color:'#8b5cf6'} };
+const STATUS_META = { draft:{label:'Brouillon',color:'#9ca3af',bg:'#f3f4f6'}, planned:{label:'Planifié',color:'#3b82f6',bg:'#eff6ff'}, review:{label:'À valider',color:'#f59e0b',bg:'#fffbeb'}, published:{label:'Publié / Envoyé',color:'#10b981',bg:'#ecfdf5'} };
+let calView='month', calDate=new Date();
+let calEvents=JSON.parse(localStorage.getItem('ld_cal_events')||'[]');
+const saveEvts=()=>localStorage.setItem('ld_cal_events',JSON.stringify(calEvents));
+const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const evtsFor=ds=>calEvents.filter(e=>e.date===ds);
+function calNav(d){if(calView==='month')calDate=new Date(calDate.getFullYear(),calDate.getMonth()+d,1);else{calDate=new Date(calDate);calDate.setDate(calDate.getDate()+d*7);}renderCal();}
+function calGoToday(){calDate=new Date();renderCal();}
+function setCalView(v){calView=v;document.getElementById('btn-view-month').classList.toggle('active',v==='month');document.getElementById('btn-view-week').classList.toggle('active',v==='week');document.getElementById('cal-month-view').style.display=v==='month'?'':'none';document.getElementById('cal-week-view').style.display=v==='week'?'':'none';renderCal();}
+function renderCal(){calView==='month'?renderMonth():renderWeek();}
+
+function renderMonth(){
+  const y=calDate.getFullYear(),m=calDate.getMonth();
+  const mNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  document.getElementById('cal-title').textContent=`${mNames[m]} ${y}`;
+  const fd=new Date(y,m,1),dow=(fd.getDay()+6)%7,st=new Date(fd);st.setDate(fd.getDate()-dow);
+  const today=fmtDate(new Date());
+  let h=`<div class="cal-month-grid"><div class="cal-month-header">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d=>`<span>${d}</span>`).join('')}</div><div class="cal-month-days">`;
+  for(let i=0;i<42;i++){
+    const c=new Date(st);c.setDate(st.getDate()+i);
+    const ds=fmtDate(c),other=c.getMonth()!==m,tdy=ds===today,evs=evtsFor(ds);
+    h+=`<div class="cal-day${other?' other-month':''}${tdy?' today':''}"><div class="day-num">${c.getDate()}</div><button class="day-add" onclick="openModal('${ds}')">+</button>`;
+    evs.slice(0,3).forEach(ev=>{const tm=TYPE_META[ev.type]||{color:'#9ca3af'},sm=STATUS_META[ev.status]||STATUS_META.draft;h+=`<div class="cal-event-chip" style="background:${sm.bg};color:${sm.color};" onclick="openModal(null,'${ev.id}')"><div class="chip-dot" style="background:${tm.color}"></div><span class="chip-label">${ev.name}</span></div>`;});
+    if(evs.length>3)h+=`<div class="more-events">+${evs.length-3}</div>`;
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
+  document.getElementById('cal-month-view').innerHTML=h;
+}
+
+function renderWeek(){
+  const today=fmtDate(new Date()),c=new Date(calDate);
+  c.setDate(c.getDate()-((c.getDay()+6)%7));
+  const mn=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+  const ws=new Date(c),we=new Date(c);we.setDate(we.getDate()+6);
+  document.getElementById('cal-title').textContent=ws.getMonth()===we.getMonth()?`${ws.getDate()}–${we.getDate()} ${mn[ws.getMonth()]} ${ws.getFullYear()}`:`${ws.getDate()} ${mn[ws.getMonth()]} – ${we.getDate()} ${mn[we.getMonth()]} ${we.getFullYear()}`;
+  const dn=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  let h=`<div class="cal-week-grid">`;
+  for(let i=0;i<7;i++){
+    const d=new Date(c);d.setDate(c.getDate()+i);
+    const ds=fmtDate(d),tdy=ds===today,evs=evtsFor(ds);
+    h+=`<div class="cal-week-col"><div class="cal-week-col-header"><div class="week-day-name">${dn[i]}</div><div class="week-day-num${tdy?' today-num':''}">${d.getDate()}</div></div><div class="cal-week-events">`;
+    evs.forEach(ev=>{const tm=TYPE_META[ev.type]||{label:ev.type,color:'#9ca3af'},sm=STATUS_META[ev.status]||STATUS_META.draft;h+=`<div class="cal-event-card" style="background:${sm.bg};border-left-color:${tm.color};" onclick="openModal(null,'${ev.id}')"><div class="event-card-title">${ev.name}</div><div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;"><span class="event-type-badge" style="background:${tm.color}">${tm.label}</span><span class="event-status-badge" style="color:${sm.color};border:1px solid ${sm.color}44">${sm.label}</span></div></div>`;});
+    h+=`<button class="week-add-btn" onclick="openModal('${ds}')">+ Ajouter</button></div></div>`;
+  }
+  h+=`</div>`;
+  document.getElementById('cal-week-view').innerHTML=h;
+}
+
+function openModal(preDate,eventId){
+  const mo=document.getElementById('event-modal');
+  document.getElementById('modal-name').value='';
+  document.getElementById('modal-type').value='linkedin-post';
+  document.getElementById('modal-date').value=preDate||fmtDate(new Date());
+  document.getElementById('modal-status').value='planned';
+  document.getElementById('modal-notes').value='';
+  document.getElementById('modal-event-id').value='';
+  document.getElementById('modal-delete-btn').style.display='none';
+  document.getElementById('modal-title').textContent='Ajouter un contenu';
+  if(eventId){const ev=calEvents.find(e=>e.id===eventId);if(ev){document.getElementById('modal-event-id').value=ev.id;document.getElementById('modal-name').value=ev.name;document.getElementById('modal-type').value=ev.type;document.getElementById('modal-date').value=ev.date;document.getElementById('modal-status').value=ev.status;document.getElementById('modal-notes').value=ev.notes||'';document.getElementById('modal-delete-btn').style.display='';document.getElementById('modal-title').textContent='Modifier le contenu';}}
+  mo.classList.add('open');
+}
+
+function openModalPrefill(type,name){
+  openModal(null,null);
+  document.getElementById('modal-name').value=name;
+  document.getElementById('modal-type').value=type;
+  document.getElementById('modal-status').value='draft';
+  document.getElementById('modal-title').textContent='Ajouter au calendrier';
+}
+
+function closeModal(){document.getElementById('event-modal').classList.remove('open');}
+function closeModalIfBg(e){if(e.target===document.getElementById('event-modal'))closeModal();}
+
+function saveEvent(){
+  const name=document.getElementById('modal-name').value.trim();
+  if(!name){document.getElementById('modal-name').focus();return;}
+  const date=document.getElementById('modal-date').value;
+  if(!date){document.getElementById('modal-date').focus();return;}
+  const eid=document.getElementById('modal-event-id').value;
+  const ev={id:eid||Date.now().toString(),name,type:document.getElementById('modal-type').value,date,status:document.getElementById('modal-status').value,notes:document.getElementById('modal-notes').value.trim()};
+  if(eid){const idx=calEvents.findIndex(e=>e.id===eid);if(idx!==-1)calEvents[idx]=ev;}else calEvents.push(ev);
+  saveEvts();closeModal();renderCal();
+}
+
+function deleteEvent(){
+  const id=document.getElementById('modal-event-id').value;
+  if(!id||!confirm('Supprimer ce contenu ?'))return;
+  calEvents=calEvents.filter(e=>e.id!==id);
+  saveEvts();closeModal();renderCal();
+}
+</script>
+</body>
+</html>
